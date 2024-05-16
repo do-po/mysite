@@ -9,9 +9,22 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import pymysql
 from datetime import timedelta
 
-# queries 로드
+# 쿼리문들이 모여있는 queries 로드
 
 from static.python import queries
+
+# 환경 변수 dotenv 로드
+
+from dotenv import load_dotenv
+import os
+
+# .env 파일을 로드
+
+load_dotenv()
+
+# database에 연결하는 MyDB Class 로드
+
+from static.python.database import MyDB
 
 # Flask라는 class 생성 (인자를 파일명으로 받아옴, 파일명이 이 파일의 이름일 경우 __name__)
 
@@ -19,61 +32,21 @@ app = Flask(__name__)
 
 # secret_key 설정 (session data 암호화 키)
 
-app.secret_key = 'ABC'
+app.secret_key = os.getenv('secret_key')
 
 # 세션 데이터의 생명주기(지속시간)을 설정
 
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds= 15)
 
-# 세션 데이터 초기화 (web 열었을 때 이전의 세션이 남아있을 지 모르기 때문)
+# MyDB Class 생성
 
-# session.clear()
-
-# DB server와 연결 -> 가상 공간 Cursor 생성 -> 
-# 매개변수 query문, data 값을 이용하여 -> 질의 보냄 (execute) ->
-# 결과 값을 받아오거나 DB 서버와 동기화 (fetchall or commit) -> DB 서버와 연결을 종료 (close)
-
-def db_execute(query, *data): # *data == data 매개변수의 갯수는 가변적이다
-
-    # 데이터 베이스와 연결
-
-    _db = pymysql.connect(
-        host = 'retsamcrown.mysql.pythonanywhere-services.com',
-        port = 3306,
-        user = 'retsamcrown',
-        password = 'dbpassword',
-        db = 'retsamcrown$ubion'
-    )
-
-    # 가상공간 Cursor 생성
-        # pymysql의 커서들 중 DictCursor로 불러와야겠다 (값이 list 안의 dict 형태로 나옴)
-
-    cursor = _db.cursor(pymysql.cursors.DictCursor)
-
-    # 매개변수 query, data를 이용하여 질의 (질의가 DB에 바로 영향을 주는 구문 형태가 아니기에 cursor에서 구문을 실행하는 것)
-
-    cursor.execute(query, data)
-
-    # query가 select라면 결과값을 변수(result)에 저장
-        # query가 길어지면 \n으로 줄을 나눠주기 때문에 좌, 우의 공백을 제거하는게 필요
-
-    if query.strip().upper().startswith('SELECT'):
-        result = cursor.fetchall()
-
-    # query가 select가 아니라면 DB 서버와 동기화 하고 변수(result)는 Query Done 문자를 대입
-
-    else:
-        _db.commit()
-        result = 'Query Done'
-
-    # DB 서버와의 연결을 종료
-
-    _db.close()
-
-    # 결과(result) return
-
-    return result
-
+mydb = MyDB(
+    os.getenv('host'),
+    int(os.getenv('port')),
+    os.getenv('user'),
+    os.getenv('password'),
+    os.getenv('db_name'),
+)
 
 # 메인페이지 api 생성
     # 로그인 화면
@@ -125,7 +98,7 @@ def main():
 
     # 함수를 호출
 
-    db_result = db_execute(queries.log_in_query, _id, _pass)
+    db_result = mydb.db_execute(queries.log_in_query, _id, _pass)
 
     # 로그인의 성공 여부 == db_result가 존재 여부
 
@@ -185,7 +158,7 @@ def check_id():
     # 유저가 보낸 id 값이 사용 가능한가?
         # 조건문 == 해당하는 id로 table에 데이터가 존재하는가 ?
 
-    db_result = db_execute(queries.check_id_query, _id)
+    db_result = mydb.db_execute(queries.check_id_query, _id)
 
     # id가 사용 가능한 경우 == db_result 값이 없을 때
 
@@ -215,7 +188,7 @@ def sign_up2():
     # 함수 호출 [에러가 발생하는 경우가 있으니 (ID 삽입할 때 다른 사람이랑 하필 겹쳐서 안 들어가지거나 서버 오류거나 등등) try 생성]
 
     try:
-        db_result = db_execute(queries.sign_up_query, _id, _pass, _name)
+        db_result = mydb.db_execute(queries.sign_up_query, _id, _pass, _name)
         print(db_result) # 이거 사실 필요 없긴한데 (어차피 Query Done 나오니까) 잘 들어갔는 지 내용 확인하려고 넣는 구문
 
     except:
@@ -258,4 +231,4 @@ def log_out():
 # 웹 서버를 실행
     # flask run 돌릴거라 아래는 cmd 점검용
 
-# app.run(debug= True)
+app.run(debug= True)
