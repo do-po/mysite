@@ -231,4 +231,4 @@ def log_out():
 # 웹 서버를 실행
     # flask run 돌릴거라 아래는 cmd 점검용
 
-app.run(debug= True)
+# app.run(debug= True)
