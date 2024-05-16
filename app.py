@@ -9,6 +9,10 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import pymysql
 from datetime import timedelta
 
+# queries 로드
+
+from static.python import queries
+
 # Flask라는 class 생성 (인자를 파일명으로 받아옴, 파일명이 이 파일의 이름일 경우 __name__)
 
 app = Flask(__name__)
@@ -119,20 +123,9 @@ def main():
 
     # 유저가 보낸 데이터를 DB server의 table data와 비교
 
-    log_in_query = '''
-    select
-    *
-    from
-    `user`
-    where
-    `id` = %s
-    and
-    `password` = %s
-    '''
-
     # 함수를 호출
 
-    db_result = db_execute(log_in_query, _id, _pass)
+    db_result = db_execute(queries.log_in_query, _id, _pass)
 
     # 로그인의 성공 여부 == db_result가 존재 여부
 
@@ -192,16 +185,7 @@ def check_id():
     # 유저가 보낸 id 값이 사용 가능한가?
         # 조건문 == 해당하는 id로 table에 데이터가 존재하는가 ?
 
-    check_id_query = """
-        select
-        *
-        from
-        `user`
-        where
-        id = %s
-    """
-
-    db_result = db_execute(check_id_query, _id)
+    db_result = db_execute(queries.check_id_query, _id)
 
     # id가 사용 가능한 경우 == db_result 값이 없을 때
 
@@ -228,19 +212,10 @@ def sign_up2():
 
     print(f'/sign_up2[post] 유저 id : {_id}, password : {_pass}, 이름 : {_name}')
 
-    # DB에 삽입하는 query 작성
-
-    user_data_query = """
-        insert
-        into
-        `user`
-        values (%s, %s, %s)
-    """
-
     # 함수 호출 [에러가 발생하는 경우가 있으니 (ID 삽입할 때 다른 사람이랑 하필 겹쳐서 안 들어가지거나 서버 오류거나 등등) try 생성]
 
     try:
-        db_result = db_execute(user_data_query, _id, _pass, _name)
+        db_result = db_execute(queries.sign_up_query, _id, _pass, _name)
         print(db_result) # 이거 사실 필요 없긴한데 (어차피 Query Done 나오니까) 잘 들어갔는 지 내용 확인하려고 넣는 구문
 
     except:
@@ -280,7 +255,7 @@ def log_out():
 
 
 
-
 # 웹 서버를 실행
+    # flask run 돌릴거라 아래는 cmd 점검용
 
-app.run(debug= True)
+# app.run(debug= True)
