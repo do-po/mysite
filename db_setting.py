@@ -2,7 +2,7 @@ import pymysql
 import pymysql.cursors
 
 _db = pymysql.connect(
-    host = 'retsamcrown.mysql.pythonanywhere-service.com',
+    host = 'retsamcrown.mysql.pythonanywhere-services.com',
     port= 3306,
     user = 'retsamcrown',
     password= 'dbpassword',

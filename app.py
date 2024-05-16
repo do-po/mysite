@@ -34,11 +34,11 @@ def db_execute(query, *data): # *data == data 매개변수의 갯수는 가변�
     # 데이터 베이스와 연결
 
     _db = pymysql.connect(
-        host = 'localhost',
+        host = 'retsamcrown.mysql.pythonanywhere-services.com',
         port = 3306,
-        user = 'root',
-        password = '0000',
-        db = 'ubion'
+        user = 'retsamcrown',
+        password = 'dbpassword',
+        db = 'retsamcrown$ubion'
     )
 
     # 가상공간 Cursor 생성
