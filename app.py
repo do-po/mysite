@@ -37,11 +37,7 @@ def db_execute(query, *data): # *data == data 매개변수의 갯수는 가변�
         host = 'retsamcrown.mysql.pythonanywhere-services.com',
         port = 3306,
         user = 'retsamcrown',
-<<<<<<< HEAD
         password = 'dbpassword',
-=======
-        password = '0000',
->>>>>>> 97d76822d38068db1baf6d4b64dfed737058a877
         db = 'retsamcrown$ubion'
     )
 
