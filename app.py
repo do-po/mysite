@@ -42,7 +42,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds= 15)
 
 mydb = MyDB(
     os.getenv('host'),
-    int(os.getenv('port')),
+    os.getenv(int('port')),
     os.getenv('user'),
     os.getenv('password'),
     os.getenv('db_name'),
